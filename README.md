@@ -44,7 +44,7 @@ copy .env.example .env
 
 ```
 POSTGRES_USER=postgres
-POSTGRES_PASSWORD=pon_una_clave
+POSTGRES_PASSWORD=postgrespass
 POSTGRES_DB=promociones
 BACKEND_PORT=3001
 FRONTEND_PORT=8080
