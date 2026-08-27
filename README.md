@@ -106,17 +106,3 @@ cd ../frontend
 npm test
 npm run lint
 ```
-
-## GitHub Actions
-
-El pipeline corre: lint -> test -> build de imagenes -> smoke test con `docker compose up` y un GET a `/health`.
-
-Hay que crear estos secrets en el repo (Settings > Secrets and variables > Actions):
-
-- `POSTGRES_USER`
-- `POSTGRES_PASSWORD`
-- `POSTGRES_DB`
-
-Si falta alguno el workflow falla.
-
-**Importante:** no subas el archivo `.env`. En el repo solo va `.env.example`.
