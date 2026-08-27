@@ -1,0 +1,130 @@
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f3f5f8;
+  color: #222;
+}
+
+.pagina {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+h1 {
+  margin-bottom: 4px;
+}
+
+.subtitulo {
+  margin-top: 0;
+  color: #555;
+}
+
+.resumen {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+
+.tarjeta {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px 16px;
+  min-width: 140px;
+}
+
+.tarjeta span {
+  display: block;
+  font-size: 13px;
+  color: #666;
+}
+
+.tarjeta strong {
+  font-size: 24px;
+}
+
+.tarjeta.vigente {
+  background: #e8f6ee;
+}
+
+.panel {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+}
+
+input,
+select,
+button {
+  padding: 8px;
+  font-size: 14px;
+}
+
+.acciones {
+  grid-column: 1 / -1;
+}
+
+.error {
+  color: #a40000;
+  background: #fdeaea;
+  padding: 8px;
+}
+
+.ok {
+  color: #0a5c2c;
+  background: #e8f6ee;
+  padding: 8px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border-bottom: 1px solid #eee;
+  text-align: left;
+  padding: 8px;
+  vertical-align: top;
+}
+
+.botones {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+button {
+  cursor: pointer;
+}
+
+.secundario {
+  margin-left: 8px;
+}
+
+.peligro {
+  background: #f8d7da;
+  border: 1px solid #d9a0a6;
+}
+
+small {
+  color: #777;
+}

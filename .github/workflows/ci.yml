@@ -1,0 +1,147 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Revisar secrets requeridos
+        env:
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+        run: |
+          faltan=0
+          if [ -z "$POSTGRES_USER" ]; then
+            echo "Falta el secret POSTGRES_USER"
+            faltan=1
+          fi
+          if [ -z "$POSTGRES_PASSWORD" ]; then
+            echo "Falta el secret POSTGRES_PASSWORD"
+            faltan=1
+          fi
+          if [ -z "$POSTGRES_DB" ]; then
+            echo "Falta el secret POSTGRES_DB"
+            faltan=1
+          fi
+          if [ "$faltan" -ne 0 ]; then
+            echo "Configura los secrets en GitHub (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Instalar backend
+        working-directory: backend
+        run: npm ci
+
+      - name: Lint backend
+        working-directory: backend
+        run: npm run lint
+
+      - name: Instalar frontend
+        working-directory: frontend
+        run: npm ci
+
+      - name: Lint frontend
+        working-directory: frontend
+        run: npm run lint
+
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Tests backend
+        working-directory: backend
+        run: |
+          npm ci
+          npm test
+
+      - name: Tests frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm test
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      BACKEND_PORT: 3001
+      FRONTEND_PORT: 8080
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Revisar secrets requeridos
+        run: |
+          if [ -z "$POSTGRES_USER" ] || [ -z "$POSTGRES_PASSWORD" ] || [ -z "$POSTGRES_DB" ]; then
+            echo "Faltan variables de entorno requeridas para construir."
+            exit 1
+          fi
+
+      - name: Construir imagenes
+        run: docker compose build
+
+  smoke:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      BACKEND_PORT: 3001
+      FRONTEND_PORT: 8080
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Revisar secrets requeridos
+        run: |
+          if [ -z "$POSTGRES_USER" ] || [ -z "$POSTGRES_PASSWORD" ] || [ -z "$POSTGRES_DB" ]; then
+            echo "Faltan variables de entorno requeridas para el smoke test."
+            exit 1
+          fi
+
+      - name: Levantar aplicacion
+        run: docker compose up -d --build
+
+      - name: Esperar /health
+        run: |
+          ok=0
+          for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30; do
+            echo "intento $i"
+            if curl -sf http://localhost:3001/health; then
+              ok=1
+              break
+            fi
+            sleep 3
+          done
+          if [ "$ok" -ne 1 ]; then
+            echo "El endpoint /health no respondio 200"
+            docker compose logs
+            exit 1
+          fi
+          codigo=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3001/health)
+          if [ "$codigo" != "200" ]; then
+            echo "Se esperaba 200 y se obtuvo $codigo"
+            exit 1
+          fi
+
+      - name: Bajar contenedores
+        if: always()
+        run: docker compose down -v
