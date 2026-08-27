@@ -34,10 +34,5 @@ Piden que se levante con `docker-compose up`. Hay 3 servicios: postgres, backend
 
 `/health` hace un `SELECT 1` a la base. Si postgres no responde, no da 200.
 
-## CI
-El workflow tiene 4 etapas en orden: lint, test, build y smoke test. El smoke test levanta compose y pega a `/health`.
-
-Las contraseñas no van en el repo. Se usan GitHub Secrets. Si falta alguna, el pipeline se cae a proposito.
-
 ## Cosas que no hice
 Login, roles, aplicar el descuento en un POS, etc. La nota del enunciado dice que no tiene que ser una app grande.
